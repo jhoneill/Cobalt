@@ -300,6 +300,8 @@ $Commands = @(
                 Verb = 'Install'
                 Description = 'Install a new package with WinGet'
                 OriginalCommandElements = @('install','--accept-package-agreements','--accept-source-agreements','--silent')
+                Platform   = @('Windows')
+                SupportsShouldProcess = $true
                 Parameters = @(
                     @{
                         Name = 'Version'
@@ -309,6 +311,10 @@ $Commands = @(
                         NoGap = $true
                         ValueFromPipelineByPropertyName = $true
                     }
+                    #--architecture
+                    #--scope
+                    #--interactive
+                    #--Silent
                 )
                 OutputHandlers = @{
                     ParameterSetName = 'Default'
@@ -317,16 +323,21 @@ $Commands = @(
             },
             @{
                 Verb = 'Get'
+                Platform   = @('Windows')
                 Description = 'Get a list of installed WinGet packages'
                 OriginalCommandElements = @('list','--accept-source-agreements')
             },
-            @{
+        <# @{
                 Verb = 'Find'
+                Platform   = @('Windows')
                 Description = 'Find a list of available WinGet packages'
                 OriginalCommandElements = @('search','--accept-source-agreements')
-            },
+            },#>
             @{
                 Verb = 'Update'
+                Platform   = @('Windows')
+                SupportsShouldProcess = $true
+                ConfirmImapact = 'High'
                 Description = 'Updates an installed package to the latest version'
                 OriginalCommandElements = @('upgrade','--accept-source-agreements','--silent')
                 Parameters = @(
@@ -344,6 +355,9 @@ $Commands = @(
             },
             @{
                 Verb = 'Uninstall'
+                Platform   = @('Windows')
+                SupportsShouldProcess = $true
+                ConfirmImapact = 'High'
                 Description = 'Uninstall an existing package with WinGet'
                 OriginalCommandElements = @('uninstall','--accept-source-agreements','--silent')
                 OutputHandlers = @{
@@ -353,11 +367,12 @@ $Commands = @(
             }
         )
     },
-    @{
+<#  @{
         Noun = 'WinGetPackageInfo'
         Verbs = @(
             @{
                 Verb = 'Get'
+                Platform   = @('Windows')
                 Description = 'Shows information on a specific WinGet package'
                 OriginalCommandElements = @('show','--accept-source-agreements')
                 DefaultParameterSetName = 'Default'
@@ -429,7 +444,7 @@ $Commands = @(
                 )
             }
         )
-    },
+    }, #>
     @{
         Noun = 'WinGetPackageUpdate'
         OutputHandlers = @{
@@ -445,6 +460,9 @@ $Commands = @(
                 # https://github.com/microsoft/winget-cli/pull/1874
                 # OriginalCommandElements = @('upgrade','--accept-source-agreements')
                 OriginalCommandElements = @('upgrade')
+                Platform   = @('Windows')
+                SupportsShouldProcess = $true
+                ConfirmImapact = 'High'
             }
         )
     }
