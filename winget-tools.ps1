@@ -7,7 +7,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #>
-
+#the normal version class won't work and the PowerShell 7 semantic version class fails with PowerShell 5, so we load the packagemanagement module which has a class we can use
 function Update-WingetCache    {
     Get-Item -Path   "$env:temp\Winget.db" -ErrorAction SilentlyContinue | Remove-Item -ErrorAction Stop
     Invoke-WebRequest -Uri "https://winget.azureedge.net/cache/source.msix" -OutFile "$env:temp\Winget.zip"
@@ -54,7 +54,7 @@ $WingetData   =  Get-SQL -Lite -Connection  "$env:temp\Winget.db" -SQL $manifest
     Select-object -property @( 'rowid', 'id', 'name',
         @{n='normalizedName';e='norm_name'},
         @{n='versionString'; e='version'},
-        @{n='version';       e={$_.version  -replace "^(\d+\.\d+\.\d+)\.(.*)$" ,'$1-$2' -as [System.Management.Automation.SemanticVersion] }},
+        @{n='version';       e={$_.version  -as [Microsoft.PackageManagement.Provider.Utility.SemanticVersion] }},
         @{n='latestVersion'; e={$false} },
         @{n="manifestURL";   e={
                                 $path = $pathparts[$_.pathpart];
@@ -207,7 +207,7 @@ function Get-InstalledSoftware {
         Get-ItemProperty |  Where-Object {$_.DisplayName -and -not $_.SystemComponent} | Select-Object -Property @(
                         @{n='name';           e='DisplayName'   },
                         @{n='versionString';  e='DisplayVersion'},
-                        @{n='version';        e={ $_.DisplayVersion  -replace "^(\d+\.\d+\.\d+)\.(.*)$" ,'$1-$2' -as [System.Management.Automation.SemanticVersion] }},
+                        @{n='version';        e={ $_.DisplayVersion  -as [Microsoft.PackageManagement.Provider.Utility.SemanticVersion] }},
                             'publisher',
                         @{n='normalizedName'; e={($_.DisplayName -replace '\W','').toLower() }},
                         @{n='ID';             e='PSChildName'   })
@@ -228,7 +228,7 @@ function Get-InstalledSoftware {
             else { Add-Member -InputObject $_ -NotePropertyName pub         -NotePropertyValue ($_.publisher -replace '^cn=(.*?),.*$','$1') -PassThru}
         } |  select-Object @(   @{n='name';           e='DisplayName'},
                                 @{n='versionString';  e='version'},
-                                @{n='version';        e={ $_.version  -replace "^(\d+\.\d+\.\d+)\.(.*)$" ,'$1-$2' -as [System.Management.Automation.SemanticVersion] }},
+                                @{n='version';        e={ $_.version  -as [Microsoft.PackageManagement.Provider.Utility.SemanticVersion] }},
                                 @{n='publisher';      e='pub'}  ,
                                 @{n='normalizedName'; e={($_.DisplayName -replace '\W','').toLower() }},  @{n='ID';e='PackageFamilyName'})
 

@@ -52,6 +52,7 @@ PowerShellVersion = '5.1.0'
 
 # Modules that must be imported into the global environment prior to importing this module
 RequiredModules = @('getsql', 
+               'packagemanagement', 
                'powershell-yaml')
 
 # Assemblies that must be loaded prior to importing this module
@@ -127,11 +128,11 @@ PrivateData = @{
     } # End of PSData hashtable
 
 
+    # CrescendoGenerated
+    CrescendoGenerated = '2022-07-13T17:14:46.3096426+01:00'
+
     # CrescendoVersion
     CrescendoVersion = '1.0.0'
-
-    # CrescendoGenerated
-    CrescendoGenerated = '2022-07-13T12:43:56.4749511+01:00'
 
 } # End of PrivateData hashtable
 

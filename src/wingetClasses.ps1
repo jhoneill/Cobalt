@@ -34,7 +34,7 @@ class wingetVerSionCompleter   : IArgumentCompleter {
         $results        = [List[CompletionResult]]::new()
         $wordToComplete = ($wordToComplete -replace "^`"|^'|'$|`"$", '' ) +"*"
         if ($FakeBoundParameters['ID']) {
-            $global:WingetVersions[$FakeBoundParameters['ID']] | Where-Object {$_ -like  $wordToComplete}| sort-object | ForEach-Object {
+            $global:WingetVersions[$FakeBoundParameters['ID']] | Where-Object {$_ -like  $wordToComplete}| Sort-Object -Descending | ForEach-Object {
                 if ($_ -notmatch '\W'){$results.Add([System.Management.Automation.CompletionResult]::new(    $_    , $_, ([System.Management.Automation.CompletionResultType]::ParameterValue) , $_)) }
                 else                  {$results.Add([System.Management.Automation.CompletionResult]::new("'$($_)'" , $_, ([System.Management.Automation.CompletionResultType]::ParameterValue) , $_)) }
             }
