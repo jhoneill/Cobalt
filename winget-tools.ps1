@@ -133,19 +133,68 @@ function Clear-WingetCache     {
 }
 
 function Get-InstalledSoftware {
+    <#
+      .SYNOPSIS
+        Gets a list of installed software and tries to match it with items in the Winget Database
+      .DESCRIPTION
+        The command gets a list of items from uninstall branches of the registry, and listed as installed by Get-AppxPackage
+        It can filter these by name, publisher and/or internal ID.
+        Unless -IgnoreWinget is specified it tries to match these against known winget items. Matches aren't guaranteed and it is possible
+        for either a short name in the repo to match a longer name of an installed package, and for one installed package to match multiple
+        repo packages (outputting multiple rows.)
+      .EXAMPLE
+        PS> Get-InstalledSoftware *itunes*
+
+        Gets packages with a name containing Itunes, and tries to match them against the winget repo
+
+            Publisher    Name     MatchesPackage   Version Installed    Version Available    WingetID
+            ---------    ----     --------------   -----------------    -----------------    --------
+            Apple Inc.   iTunes   iTunes           12124.1.57017-0      12.12.4-1            Apple.iTunes
+
+      .EXAMPLE
+        PS> Get-InstalledSoftware -Publisher adobe* -IgnoreWinget
+
+        Gets packages where the publisher is some form of Adobe but does not try to match them to winget items.
+
+            publisher                  name                      version
+            ---------                  ----                      -------
+            Adobe Inc.                 Adobe Creative Cloud      5.7.1-1
+            Adobe Inc.                 Adobe Lightroom Classic   11.4.1
+            Adobe Inc.                 Adobe Photoshop 2022      23.4.1-547
+            Adobe Inc.                 Adobe Premiere Rush       2.3.0
+            Adobe Inc.                 UXP WebView Support       1.1.0
+            Adobe Systems Incorporated Adobe Notification Client 3.0.1-1
+
+      .EXAMPLE
+        PS> Get-InstalledSoftware -Publisher microsoft* -WingetOnly
+
+        Gets packages where the publisher is Microsoft and a match is found with a winget item
+
+      .EXAMPLE
+        PS>  Get-InstalledSoftware -Wingetid  Microsoft.PowerShell
+
+       Looks to see if there is an item which can match the winget repo item with the ID "Microsoft.PowerShell"
+    #>
     [cmdletBinding(DefaultParameterSetName="Default")]
     param (
+        #The package name - wildcars are supported
+        [Parameter(Position=0)]
         $Name      = "*",
+        #The application publisher, Wildcards are supported (e.g. Adobe use 'Adobe Systems Incorporated' and 'Adobe inc' so Adobe*)
         $Publisher = "*",
+        #An internal ID. Store appss use the package family name e.g. "Microsoft.Paint_8wekyb3d8bbwe", others may be a name or a guid - wildcards are supported.
         $ID        = "*",
 
+        #A winget ID e.g. Apple.iTunes, wildcards are supported, e.g '*itunes*'
         [Parameter(ParameterSetName="Winget")]
         [ArgumentCompleter([wingetIDCompleter])]
         $Wingetid  = "*",
 
+        #If specified, does not try to match items against the Winget Repository
         [Parameter(ParameterSetName="NoWinget",Mandatory=$true)]
         [switch]$IgnoreWinget,
 
+        #If specified, only returns items which match against an item in the Winget repository
         [Parameter(ParameterSetName="Winget")]
         [switch]$WingetOnly
     )
@@ -234,9 +283,25 @@ function Get-WinGetPackageInfo {
     .PARAMETER ID
         Package ID (multiple values and wildcards allowed)
     .PARAMETER Version
-        One or more exact packages Version
+        One or more exact versions of a package in the Winget repo
     .PARAMETER ListVersions
-        Show available versions of the package
+        Show available versions of a package in the Winget repo
+    .PARAMETER MSStore
+        If specified searches for the Package ID in the Microsoft store; otherwise uses the Winget Repo
+
+    .EXAMPLE
+        PS> Get-WinGetPackageInfo Microsoft.PowerShell -ListVersions
+        Gets versions of PowerShell available for download from the Winget Repo
+
+    ..EXAMPLE
+        PS> Get-WinGetPackageInfo 'Microsoft.PowerShell' -Version '7.1.0.0'
+        Gets details of a PowerShell versopm available for download from the Winget Repo,
+        if -version is omitted the latest version will be selected. Both the package ID and its
+        associated versions will tab-complete
+
+    .EXAMPLE
+        PS> Get-WinGetPackageInfo  -MSStore -ID XPFFTQ037JWMHS
+        Gets the details of Microsoft Edge from the MSStore
     #>
     [CmdletBinding()]
 
@@ -286,18 +351,38 @@ function Get-WinGetPackageInfo {
 }
 
 function Find-WinGetPackage    {
-<#
-  .DESCRIPTION
-    Find a list of available WinGet packages
-  .PARAMETER ID
-    Package ID
-  .PARAMETER Exact
-    Search by exact package name
-  .PARAMETER Source
-    Package Source
-#>
-    [CmdletBinding()]
+    <#
+    .DESCRIPTION
+        Find a list of available WinGet packages
+    .PARAMETER ID
+        Package ID - this will tab complete for items in the winget repository, and must be a complete ID.
+    .PARAMETER Name
+        Package Name - this will be a keyword search in the MS Store, and can support Wildcards when working with winget repo
+    .PARAMETER Tag
+        A Tag - this will be a keyword search in the MS Store, and can support Wildcards when working with winget repo
+    .PARAMETER Tag
+        A Tag - this will be a keyword search in the MS Store, and can support Wildcards when working with winget repo
 
+    .PARAMETER MSStore
+        If specified searches in the Microsoft store instead of the Winget repository
+
+    .EXAMPLE
+        PS> find-WinGetPackage  'Notepad++.Notepad++'
+        Finds Notepad++ in the winget repository
+
+    .EXAMPLE
+        PS> find-WinGetPackage -Name 'Notepad*'
+        Finds packages in the winget repository with Notepad in their name
+
+    .EXAMPLE
+        PS> find-WinGetPackage  -Tag editor
+        Finds packages in the winget repository tagged as editors
+
+    .EXAMPLE
+        PS> find-WinGetPackage  -Tag editor -MSStore
+        Finds packages agged as editors but this time from the store
+    #>
+    [CmdletBinding()]
     param   (
         [Parameter(ParameterSetName='StoreID',  Position=0, ValueFromPipelineByPropertyName=$true,Mandatory=$true)]
         [Parameter(ParameterSetName='WingetID', Position=0, ValueFromPipelineByPropertyName=$true,Mandatory=$true)]
@@ -333,7 +418,7 @@ function Find-WinGetPackage    {
         elseif ($name -and $name -ne '*')             {$WingetData.Where({$_.name -like $name -and $newestIDs[$_.id].rowid -eq $_.rowid }) | Sort-Object Name }
         elseif ($id   -and $version)                  {$WingetData.Where({$_.id -like $id -and $_.versionString -in $version})   | Sort-Object Version,VesionString -Descending }
         elseif ($id   -and $newestIDs[$id] )          {$newestIDs[$id] }
-        elseif ($id  )                                {$WingetData.Where({$_.id -like $id -and $_.versionString -in $version})   | Sort-Object Version,VesionString -Descending }
+        elseif ($id  )                                {$WingetData.Where({$_.id -like $id})   | Sort-Object Version,VesionString -Descending }
     }
     else {
         try {    $url = (Get-WinGetSource msstore).Arg}  catch {}
@@ -350,9 +435,10 @@ function Find-WinGetPackage    {
         elseif ($ID)   {$jsonText = '{"Filters":[{"PackageMatchField":"PackageIdentifier","RequestMatch":{"KeyWord":"' + $ID + '","MatchType":"Exact"}}]}' }
         $ManifestSb  = [scriptblock]::Create("""$url/packageManifests/`$(`$this.PackageIdentifier)""")
         Invoke-RestMethod -Method post -UseBasicParsing -Uri "$url/manifestSearch" -ContentType "application/json" -body $jsonText  |
-            ForEach-Object 'Data' | Select-Object -Property *,@{n='MSStore';e={$true}},@{n='name';e='PackageName'}, @{n='ID';e='PackageIdentifier'} |
-                Add-Member -PassThru -MemberType ScriptProperty -Name 'manifestURL'  -value $ManifestSb |
-                ForEach-Object {$_.pstypeNames.add('MSStoreManifestItem') ; $_ }
+            ForEach-Object 'Data' | Sort-Object -Property  PackageName |
+                Select-Object -Property *,@{n='MSStore';e={$true}},@{n='name';e='PackageName'}, @{n='ID';e='PackageIdentifier'} |
+                    Add-Member -PassThru -MemberType ScriptProperty -Name 'manifestURL'  -value $ManifestSb |
+                        ForEach-Object {$_.pstypeNames.add('MSStoreManifestItem') ; $_ }
     }
 }
 
@@ -371,11 +457,3 @@ Register-ArgumentCompleter -CommandName Update-WinGetPackage    -ParameterName I
 Register-ArgumentCompleter -CommandName Uninstall-WinGetPackage -ParameterName ID      -ScriptBlock $idscriptblock
 Register-ArgumentCompleter -CommandName Install-WinGetPackage   -ParameterName ID      -ScriptBlock $idscriptblock
 Register-ArgumentCompleter -CommandName Install-WinGetPackage   -ParameterName Version -ScriptBlock $verscriptblock
-
-
-<#
-should set Market for store but its OK to find and get details of packages without
-gc ([System.Environment]::GetFolderPath('LocalApplicationData') + "\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\localstate\Settings.json") | ConvertFrom-Json | % installBehavior | % preferences |% locale
-Computer\HKEY_CURRENT_USER\Control Panel\International\Geo
-Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Servicing
-#>

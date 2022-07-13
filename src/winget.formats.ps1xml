@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+   <ViewDefinitions>
+      <View>
+         <Name>vWingetInstalledPackage.TableView</Name>
+         <ViewSelectedBy>
+            <TypeName>WingetInstalledPackage</TypeName>
+         </ViewSelectedBy>
+         <TableControl>
+            <TableHeaders>
+               <TableColumnHeader>
+                  <Label>Publisher</Label>
+                  <Width>26</Width>
+               </TableColumnHeader>
+               <TableColumnHeader>
+                  <Label>Name</Label>
+                  <Width>45</Width>
+               </TableColumnHeader>
+               <TableColumnHeader>
+                  <Label>MatchesPackage</Label>
+                  <Width>45</Width>
+               </TableColumnHeader>
+               <TableColumnHeader>
+                  <Label>Version Installed</Label>
+                  <Width>20</Width>
+               </TableColumnHeader>
+               <TableColumnHeader>
+                  <Label>Version Available</Label>
+                  <Width>20</Width>
+               </TableColumnHeader>
+               <TableColumnHeader>
+                  <Label>WingetID</Label>
+                  <Width>40</Width>
+               </TableColumnHeader>
+            </TableHeaders>
+            <TableRowEntries>
+               <TableRowEntry>
+                  <Wrap />
+                  <TableColumnItems>
+                     <TableColumnItem>
+                        <PropertyName>publisher</PropertyName>
+                     </TableColumnItem>
+                     <TableColumnItem>
+                        <PropertyName>name</PropertyName>
+                     </TableColumnItem>
+                     <TableColumnItem>
+                        <PropertyName>matches</PropertyName>
+                     </TableColumnItem>
+                     <TableColumnItem>
+                        <PropertyName>installed</PropertyName>
+                     </TableColumnItem>
+                     <TableColumnItem>
+                        <PropertyName>available</PropertyName>
+                     </TableColumnItem>
+                      <TableColumnItem>
+                        <PropertyName>wingetID</PropertyName>
+                     </TableColumnItem>
+                  </TableColumnItems>
+               </TableRowEntry>
+            </TableRowEntries>
+         </TableControl>
+      </View>
+   </ViewDefinitions>
+</Configuration>

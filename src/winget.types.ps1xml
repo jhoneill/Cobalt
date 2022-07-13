@@ -48,8 +48,6 @@
       </Script></ScriptMethod>
     </Members>
   </Type>
-
-
   <Type><Name>WingetInstalledPackage</Name>
     <Members>
       <MemberSet><Name>PSStandardMembers</Name>
@@ -81,7 +79,6 @@
           <PropertySet><Name>DefaultDisplayPropertySet</Name><ReferencedProperties>
             <Name>publisher</Name>
             <Name>name</Name>
-            <Name>matches</Name>
             <Name>version</Name>
             </ReferencedProperties></PropertySet>
         </Members>

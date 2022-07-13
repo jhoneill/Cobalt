@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Pre-relase] - 2022-07-13
+### Added
+- Local caching of Winget repository information **This requires the GetSQL module**
+- Get-InstalledSoftware which can match installed software to packages in the repo
+### Changed
+- `Find-WinGetPackage` to use the cached repo and rest calls to the MS store. (Won't currently support Private repos)
+- `Get-WinGetPackageInfo` to download and process the manifest **which needs the PowerShell-Yaml module**
+- The new commands are in file which is merged into the PSM1 file. The original build didn't work with the current download of crescendo, but does work with my version https://github.com/jhoneill/Crescendo/tree/James which can set more options in the PSD1 file, so build.ps1 has been updated accordingly. 
+
 ## [0.3.1] - 2022-05-13
 ### Fixed
 - Package upgrade list functionality now correctly supports non-EN-US localities

@@ -48,7 +48,7 @@ $commands | ForEach-Object {
 }
 
 #Modified to add winget tools to the PSM1 and build a better PSD1 file.
-Export-CrescendoModule -ConfigurationFile $tempJsonArray -ModuleName $psm1Path -Force -TypesToProcess .\winget.types.ps1xml -ScriptsToProcess .\wingetClasses.ps1 -RequiredModules getsql, powershell-yaml -FunctionsToExport @(
+Export-CrescendoModule -ConfigurationFile $tempJsonArray -ModuleName $psm1Path -Force -FormatsToProcess .\winget.formats.ps1xml   -TypesToProcess .\winget.types.ps1xml -ScriptsToProcess .\wingetClasses.ps1 -RequiredModules getsql, powershell-yaml -FunctionsToExport @(
 'Get-InstalledSoftware', 'Clear-WingetCache', 'Update-WingetCache', 'Find-WinGetPackage', 'Get-WinGetPackage', 'Install-WinGetPackage', 'Uninstall-WinGetPackage', 'Update-WinGetPackage','Get-WinGetPackageInfo',
   'Get-WinGetPackageUpdate' , 'Get-WinGetSource', 'Register-WinGetSource', 'Unregister-WinGetSource') -Author "Ethan Bergstrom, James O'Neill" -Copyright "Orginal work Copyright 2021 Ethan Bergstrom, additions Copyright 2022 James O'Neill"
 Get-Content .\winget-tools.ps1 >> $psm1path
