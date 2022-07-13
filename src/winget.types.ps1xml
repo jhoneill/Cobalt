@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Types>
+  <Type><Name>MSStoreManifestItem</Name>
+    <Members>
+      <ScriptProperty>
+            <Name>versionString</Name>
+            <GetScriptBlock>$this.versions[0].PackageVersion</GetScriptBlock>
+      </ScriptProperty>
+      <MemberSet><Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet><Name>DefaultDisplayPropertySet</Name><ReferencedProperties>
+            <Name>name</Name>
+            <Name>id</Name>
+            <Name>versionString</Name>
+            <Name>manifestURL</Name>
+            </ReferencedProperties></PropertySet>
+        </Members>
+      </MemberSet>
+      <ScriptMethod><Name>GetManifest</Name><Script>
+            $v = (Invoke-RestMethod $this.ManifestUrl -UseBasicParsing).data.versions[0]
+            if (-not $v.DefaultLocale) {return}
+            if ($v.Installers)     {Add-Member -InputObject $v.DefaultLocale -NotePropertyName Installers   -NotePropertyValue $v.Installers}
+            if ($v.Locales)        {Add-Member -InputObject $v.DefaultLocale -NotePropertyName Localization -NotePropertyValue $v.Locales}
+            if ($v.PackageVersion) {Add-Member -InputObject $v.DefaultLocale -NotePropertyName PackageVersion -NotePropertyValue $v.PackageVersion}
+            $v.DefaultLocale.pstypenames.Add('WingetManifestDetails')
+            $v.DefaultLocale
+      </Script></ScriptMethod>
+    </Members>
+  </Type>
+  <Type><Name>WingetManifestItem</Name>
+    <Members>
+      <MemberSet><Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet><Name>DefaultDisplayPropertySet</Name><ReferencedProperties>
+            <Name>name</Name>
+            <Name>id</Name>
+            <Name>versionString</Name>
+            <Name>manifestURL</Name>
+            </ReferencedProperties></PropertySet>
+        </Members>
+      </MemberSet>
+      <ScriptMethod><Name>GetManifest</Name><Script>
+            $o =  [pscustomobject](Invoke-RestMethod $this.manifestURL | ConvertFrom-Yaml)
+            if ($o.Installers)   {$o.installers   = foreach ($i in $o.Installers)    {[pscustomObject]$i}}
+            if ($o.Localization) {$o.Localization = foreach ($l in $o.Localization)  {[pscustomObject]$l}}
+            $o.pstypeNames.add('WingetManifestDetails')
+            $o
+      </Script></ScriptMethod>
+    </Members>
+  </Type>
+
+
+  <Type><Name>WingetInstalledPackage</Name>
+    <Members>
+      <MemberSet><Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet><Name>DefaultDisplayPropertySet</Name><ReferencedProperties>
+            <Name>publisher</Name>
+            <Name>name</Name>
+            <Name>matches</Name>
+            <Name>installed</Name>
+            <Name>available</Name>
+            <Name>ID</Name>
+            <Name>wingetID</Name>
+            </ReferencedProperties></PropertySet>
+        </Members>
+      </MemberSet>
+      <ScriptMethod><Name>GetManifest</Name><Script>
+            $o =  [pscustomobject](Invoke-RestMethod $this.manifestURL | ConvertFrom-Yaml)
+            if ($o.installlers)  {$o.installers   = foreach ($i in $o.Installers)    {[pscustomObject]$i}}
+            if ($o.Localization) {$o.Localization = foreach ($l in $o.Localization)  {[pscustomObject]$l}}
+            $o.pstypeNames.add('WingetManifestDetails')
+            $o
+      </Script></ScriptMethod>
+    </Members>
+  </Type>
+  <Type><Name>InstalledPackage</Name>
+    <Members>
+      <MemberSet><Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet><Name>DefaultDisplayPropertySet</Name><ReferencedProperties>
+            <Name>publisher</Name>
+            <Name>name</Name>
+            <Name>matches</Name>
+            <Name>version</Name>
+            </ReferencedProperties></PropertySet>
+        </Members>
+      </MemberSet>
+    </Members>
+  </Type>
+</Types>
